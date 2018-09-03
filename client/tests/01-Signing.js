@@ -57,6 +57,7 @@ describe('Signing module', function() {
 
     beforeEach(function() {
       keys = signing.createKeys();
+      console.log("KEYS FROM THE TEST: ", keys);
     });
 
     it('should return an object with two keys', function() {
