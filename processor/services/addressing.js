@@ -10,6 +10,7 @@ const PREFIXES = {
   SIRE_LISTING: '02',
   OFFER: '03'
 };
+const hash = str => createHash('sha512').update(str).digest('hex');
 
 /**
  * A function that takes a public key and returns the corresponding collection
@@ -25,7 +26,8 @@ const PREFIXES = {
  */
 const getCollectionAddress = publicKey => {
   // Enter your solution here
-
+  console.log(typeof publicKey, " Publickey: ",publicKey,publicKey.length);
+  return NAMESPACE+PREFIXES.COLLECTION+hash(publicKey).slice(0,62);
 };
 
 /**
@@ -34,6 +36,8 @@ const getCollectionAddress = publicKey => {
  */
 const getMojiAddress = (ownerKey, dna) => {
   // Your code here
+    console.log(typeof dna, " dna: ",dna,dna.length);
+    return NAMESPACE+PREFIXES.MOJI+hash(ownerKey).slice(0,8)+hash(dna).slice(0,54);
 
 };
 
@@ -43,6 +47,7 @@ const getMojiAddress = (ownerKey, dna) => {
  */
 const getSireAddress = ownerKey => {
   // Your code here
+    return NAMESPACE+PREFIXES.SIRE_LISTING+hash(ownerKey).slice(0,62);
 
 };
 
@@ -76,7 +81,9 @@ const getOfferAddress = (ownerKey, addresses) => {
  */
 const isValidAddress = address => {
   // Your code here
-
+    return !(typeof address !== 'string'
+        || address.length !== 70
+        || address.slice(0, 6) !== NAMESPACE);
 };
 
 module.exports = {

@@ -17,6 +17,12 @@
  */
 const encode = object => {
   // Enter your solution here
+    console.log("WE GOT AN OBJECT TO ENCODE: ", object);
+    console.log("STRINGIFY THE OBJ: ", JSON.stringify(object));
+    console.log("SORT THE OBJ: ", JSON.stringify(object, Object.keys(object).sort()));
+    console.log("BUFFER THE SORTED OBJ: ", Buffer.from(JSON.stringify(object, Object.keys(object).sort())));
+
+    return Buffer.from(JSON.stringify(object, Object.keys(object).sort()));
 
 };
 
@@ -26,6 +32,12 @@ const encode = object => {
  */
 const decode = buffer => {
   // Your code here
+
+    console.log("data to encode as buffer: ", buffer);
+    const jsonObj = JSON.parse(buffer.toString());
+    console.log("JSON DECODED OBJ: ", jsonObj);
+
+    return jsonObj;
 
 };
 
