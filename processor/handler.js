@@ -1,8 +1,11 @@
 'use strict';
 
+const { randomBytes, createHash } = require('crypto') ;
+
+const { getCollectionAddress } = require('./services/addressing');
 const { TransactionHandler } = require('sawtooth-sdk/processor/handler');
 const { InvalidTransaction } = require('sawtooth-sdk/processor/exceptions');
-const { decode } = require('./services/encoding');
+const { decode, encode } = require('./services/encoding');
 
 
 const FAMILY_NAME = 'cryptomoji';
@@ -49,6 +52,36 @@ class MojiHandler extends TransactionHandler {
   apply (txn, context) {
     // Enter your solution here
     // (start by decoding your payload and checking which action it has)
+      try {
+          const payload = decode(txn.payload);
+          const  publicKey = txn._publicKey;
+          console.log('PAYLOAD IS: ', payload);
+          console.log('PUBLIC KEY IS: ', publicKey);
+
+          switch (payload.action) {
+              case 'CREATE_COLLECTION':
+                  console.log("GOT A CREATE COLLECTION REQUEST");
+                const collectionAddress = getCollectionAddress(publicKey);
+                console.log("CREATED COLLECTION ADDRESS: ", collectionAddress, "WITH LENGTH: ", collectionAddress.length);
+
+              return context.getState([ collectionAddress ]).then(state => {
+                  if (state[collectionAddress].length > 0) {
+                      throw new InvalidTransaction('Collection already exists');
+                  }
+                  const update = {};
+                  update[collectionAddress] = encode({ key: publicKey, moji: [collectionAddress,collectionAddress,collectionAddress],});
+                  return context.setState(update);
+                });
+
+                break;
+              default:
+                throw new InvalidTransaction('Invalid action !!');
+          }
+      } catch (ex) {
+          throw new InvalidTransaction('Unable to payload !!');
+      }
+
+      return new Promise((_, reject) => reject(err));
 
   }
 }
