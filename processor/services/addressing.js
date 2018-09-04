@@ -81,9 +81,12 @@ const getOfferAddress = (ownerKey, addresses) => {
  */
 const isValidAddress = address => {
   // Your code here
+    var regexp = /^[0-9a-fA-F]+$/;
+
     return !(typeof address !== 'string'
         || address.length !== 70
-        || address.slice(0, 6) !== NAMESPACE);
+        || address.slice(0, 6) !== NAMESPACE
+        || !regexp.test(address));
 };
 
 module.exports = {
