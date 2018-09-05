@@ -7,6 +7,7 @@ import {encodeAll} from "./services/transactions";
 
 const keys = createKeys();
 const privateKey = keys.privateKey;
+const publickKey = keys.publicKey;
 
 
 console.log("WE GOT PRIVATE KEY: ", privateKey);
@@ -24,26 +25,22 @@ axios({
 });
 
 
-// axios({
-//     method: 'get',
-//     url: 'localhost:8008/batches',
-// }).then(function(response) {
-//     console.log("RESPONSE: ", response);
-// }).catch(function (error) {
-//     console.log("ERROR: ", error);
-// });
-
-
-
-
-
-
-
 
 
 ReactDOM.render((
   <BrowserRouter>
-    <h1>Hello, Cryptomoji!</h1>
+    <div>
+        <h1>Hello, Cryptomoji!</h1>
+        <h2>Keys:</h2>
+        <ul>
+            <li>
+                {privateKey}
+            </li>
+            <li>
+                {publickKey}
+            </li>
+        </ul>
+    </div>
   </BrowserRouter>
 ), document.getElementById('app'));
 
