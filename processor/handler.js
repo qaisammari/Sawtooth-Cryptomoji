@@ -6,6 +6,8 @@ const { getCollectionAddress } = require('./services/addressing');
 const { TransactionHandler } = require('sawtooth-sdk/processor/handler');
 const { InvalidTransaction } = require('sawtooth-sdk/processor/exceptions');
 const { decode, encode } = require('./services/encoding');
+const createCollection = require('./helpers/create_actions');
+const selectSire = require('./helpers/select_sire');
 
 
 const FAMILY_NAME = 'cryptomoji';
@@ -53,30 +55,37 @@ class MojiHandler extends TransactionHandler {
     // Enter your solution here
     // (start by decoding your payload and checking which action it has)
       try {
-          const payload = decode(txn.payload);
-          console.log("THE TRANSACTION: ", txn);
-          const  publicKey = txn.header.signerPublicKey;
-          console.log('PAYLOAD IS: ', payload);
-          console.log('PUBLIC KEY IS: ', publicKey);
+          let payload = null;
+          try {
+              payload = decode(txn.payload);
+          } catch (err) {
+              throw new InvalidTransaction('Failed to decode payload: ' + err);
+          }
+
+          const publicKey = txn.header.signerPublicKey;
+
+          console.log('......Public key', publicKey);
+          console.log('......txn signature ', txn.signature);
+          console.log('......context ', context);
+
 
           switch (payload.action) {
-              case 'CREATE_COLLECTION':
-                  console.log("GOT A CREATE COLLECTION REQUEST");
-                const collectionAddress = getCollectionAddress(publicKey);
-                console.log("CREATED COLLECTION ADDRESS: ", collectionAddress, "WITH LENGTH: ", collectionAddress.length);
-
-              return context.getState([ collectionAddress ]).then(state => {
-                  if (state[collectionAddress].length > 0) {
-                      throw new InvalidTransaction('Collection already exists');
-                  }
-                  const update = {};
-                  update[collectionAddress] = encode({ key: publicKey, moji: [collectionAddress,collectionAddress,collectionAddress],});
-                  return context.setState(update);
-                });
-
-                break;
-              default:
-                throw new InvalidTransaction('Invalid action !!');
+            case 'CREATE_COLLECTION':
+                return createCollection(context, publicKey, txn.signature);
+            case 'SELECT_SIRE':
+                return selectSire(context, publicKey, payload);
+            case 'BREED_MOJI':
+            // return breedMoji(context, publicKey, payload, txn.signature);
+            case 'CREATE_OFFER':
+            // return createOffer(context, publicKey, payload);
+            case 'CANCEL_OFFER':
+            // return cancelOffer(context, publicKey, payload);
+            case 'ADD_RESPONSE':
+            // return addResponse(context, publicKey, payload);
+            case 'ACCEPT_RESPONSE':
+            // return acceptResponse(context, publicKey, payload);
+            default:
+            throw new InvalidTransaction('Invalid action !!');
           }
       } catch (ex) {
           throw new InvalidTransaction('Unable to payload !!');
