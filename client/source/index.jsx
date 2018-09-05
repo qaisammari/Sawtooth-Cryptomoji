@@ -14,7 +14,7 @@ console.log("WE GOT PRIVATE KEY: ", privateKey);
 
 axios({
     method: 'post',
-    url: 'localhost:8008/rest/batches',
+    url: '/api/batches',
     data: encodeAll(privateKey, {action: "CREATE_COLLECTION"}),
     headers: {'Content-Type' : 'application/octet-stream'}
 }).then(function(response) {
@@ -22,6 +22,16 @@ axios({
 }).catch(function (error) {
     console.log("ERROR: ", error);
 });
+
+
+// axios({
+//     method: 'get',
+//     url: 'localhost:8008/batches',
+// }).then(function(response) {
+//     console.log("RESPONSE: ", response);
+// }).catch(function (error) {
+//     console.log("ERROR: ", error);
+// });
 
 
 

@@ -54,7 +54,8 @@ class MojiHandler extends TransactionHandler {
     // (start by decoding your payload and checking which action it has)
       try {
           const payload = decode(txn.payload);
-          const  publicKey = txn._publicKey;
+          console.log("THE TRANSACTION: ", txn);
+          const  publicKey = txn.header.signerPublicKey;
           console.log('PAYLOAD IS: ', payload);
           console.log('PUBLIC KEY IS: ', publicKey);
 
