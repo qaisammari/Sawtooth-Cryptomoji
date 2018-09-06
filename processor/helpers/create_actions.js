@@ -56,17 +56,20 @@ const createCollection = (context, publicKey, signature) => {
             const mojiAddresses = [];
             const moji = makeMoji(publicKey, prng);
 
+            //saving the mojies
             moji.forEach(moji => {
                 const address = getMojiAddress(publicKey, moji.dna);
                 updates[address] = encode(moji);
                 mojiAddresses.push(address);
             });
 
+            //saving the collection with the mojis addresses
             updates[address] = encode({
                 key: publicKey,
                 moji: mojiAddresses.sort()
             });
 
+           //saving everything
             return context.setState(updates);
         });
 };

@@ -38,7 +38,7 @@ axios({
     console.log("RESPONSE: ", response);
     addressList =  response.data.data.map( d => {
         return (
-            <li>{d.address}</li>
+            <li>{d.address.slice(6,8) === '00'? 'Collection': d.address.slice(6,8) === '01' ? 'Moji': 'What ?'} : {d.address}</li>
         )
     });
 }).then(function() {
