@@ -77,9 +77,9 @@ services:
     #       sawtooth keygen my_key
     #     fi;
     #     sawtooth-validator -v \
-    #       --bind component:tcp://eth0:4014 \
-    #       --bind network:tcp://eth0:8810 \
-    #       --endpoint tcp://docker.for.mac.localhost:8810 \
+    #       --bind component:tcp://eth0:4004 \
+    #       --bind network:tcp://eth0:8800 \
+    #       --endpoint tcp://docker.for.mac.localhost:8800 \
     #       --peering dynamic \
     #       --seeds tcp://docker.for.mac.localhost:8800 \
     #       --minimum-peer-connectivity 1
