@@ -13,8 +13,7 @@ const Txn = require('./services/mock_txn');
 const Context = require('./services/mock_context');
 
 
-// EXTRA CREDIT: Remove `.skip` to test
-describe.skip('Cancel Offer', function() {
+describe('Cancel Offer', function() {
   let handler = null;
   let context = null;
   let privateKey = null;
