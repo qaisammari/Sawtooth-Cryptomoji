@@ -31,22 +31,59 @@ services:
     container_name: validator
     expose:
       - 4004
+      - 8800
     ports:
       - '4004:4004'
-    # start the validator with an empty genesis batch
-    entrypoint: |
-      bash -c "
-        if [ ! -f /etc/sawtooth/keys/validator.priv ]; then
-          sawadm keygen &&
-          sawtooth keygen my_key &&
-          sawset genesis -k /root/.sawtooth/keys/my_key.priv &&
-          sawadm genesis config-genesis.batch
-        fi;
+      - '8800:8800'
+    # Starts a validator with PoET consensus
+    # Replace tcp://docker.for.mac.localhost:8800 with your IP
+    entrypoint: "bash -c \"\
+        sawadm keygen --force && \
+        sawset genesis \
+          -k /etc/sawtooth/keys/validator.priv \
+          -o config-genesis.batch && \
+        sawset proposal create \
+          -k /etc/sawtooth/keys/validator.priv \
+          sawtooth.consensus.algorithm=poet \
+          sawtooth.poet.report_public_key_pem=\
+          \\\"$$(cat /etc/sawtooth/simulator_rk_pub.pem)\\\" \
+          sawtooth.poet.valid_enclave_measurements=$$(poet enclave measurement) \
+          sawtooth.poet.valid_enclave_basenames=$$(poet enclave basename) \
+          -o config.batch && \
+        poet registration create -k /etc/sawtooth/keys/validator.priv -o poet.batch && \
+        sawset proposal create \
+          -k /etc/sawtooth/keys/validator.priv \
+             sawtooth.poet.target_wait_time=5 \
+             sawtooth.poet.initial_wait_time=25 \
+             sawtooth.publisher.max_batches_per_block=100 \
+          -o poet-settings.batch && \
+        sawadm genesis \
+          config-genesis.batch config.batch poet.batch poet-settings.batch && \
         sawtooth-validator -v \
-          --endpoint tcp://validator:8800 \
+          --bind network:tcp://eth0:8800 \
           --bind component:tcp://eth0:4004 \
-          --bind network:tcp://eth0:8800
-      "
+          --peering dynamic \
+          --endpoint tcp://docker.for.mac.localhost:8800 \
+          --scheduler serial \
+          --network trust \
+          --minimum-peer-connectivity 1
+    \""
+    # Use the following code if not the first validator.
+    # Once again, replace docker.for.mac.localhost with the appropriate URL:
+    # entrypoint: |
+    #   bash -c "
+    #     if [ ! -f /etc/sawtooth/keys/validator.priv ]; then
+    #       sawadm keygen &&
+    #       sawtooth keygen my_key
+    #     fi;
+    #     sawtooth-validator -v \
+    #       --bind component:tcp://eth0:4014 \
+    #       --bind network:tcp://eth0:8810 \
+    #       --endpoint tcp://docker.for.mac.localhost:8810 \
+    #       --peering dynamic \
+    #       --seeds tcp://docker.for.mac.localhost:8800 \
+    #       --minimum-peer-connectivity 1
+    #   "
 
   settings-tp:
     image: hyperledger/sawtooth-settings-tp:1.0
@@ -54,6 +91,16 @@ services:
     depends_on:
       - validator
     entrypoint: settings-tp -v -C tcp://validator:4004
+
+  poet-validator-registry-tp:
+    image: hyperledger/sawtooth-poet-validator-registry-tp:1.0
+    container_name: sawtooth-poet-validator-registry-tp
+    expose:
+      - 4004
+    command: poet-validator-registry-tp -C tcp://validator:4004
+    environment:
+      PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+    stop_signal: SIGKILL
 
   rest-api:
     image: hyperledger/sawtooth-rest-api:1.0
